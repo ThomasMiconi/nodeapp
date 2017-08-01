@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "compression": "^1.7.0",
-    "expres": "0.0.5",
+    "ejs": "^2.5.7",
     "express": "^4.15.3"
   }
 }
