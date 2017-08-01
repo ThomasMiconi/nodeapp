@@ -1,0 +1,16 @@
+{
+  "name": "site4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "compression": "^1.7.0",
+    "expres": "0.0.5",
+    "express": "^4.15.3"
+  }
+}
