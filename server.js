@@ -1,6 +1,23 @@
 // Load required packages
 var express = require('express');
 var compression = require('compression');
+var sqlite3 = require('sqlite3').verbose();
+
+
+var db = new sqlite3.Database(':memory:');
+
+db.serialize(function() {
+    db.run("CREATE TABLE events (info TEXT, eventdate DATE  CHECK (date(eventdate) IS NOT NULL))");
+
+    var stmt = db.prepare("INSERT INTO events (info, eventdate) VALUES (?, ?)");
+    for (var i = 0; i < 5; i++) {
+        stmt.run(["Ipsum " + i, '2004-11-3'+i], function errorCatcher(err){ if (err) console.log('Error at insertion '+i+': '+err);});  // Problem: i is always 5 by the time the callback is called!
+    }
+    stmt.finalize();
+});
+
+
+
 
 // fake posts to simulate a database
 const posts = [
@@ -49,7 +66,13 @@ router.get('/', function(req, res) {
   res.render('home', {posts: posts});
 });
 
-
+app.get('/events', (req, res) => {
+    db.all("SELECT rowid AS id, info, eventdate FROM events", function(err, rows) {
+              //console.log(row.id + ": " + row.info); // if using db.each
+              //console.log(rows)  // if using db.all
+        res.send(rows)
+})
+    });
 
 // blog post
 app.get('/post/:id', (req, res) => {
