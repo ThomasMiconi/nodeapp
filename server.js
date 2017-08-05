@@ -2,12 +2,18 @@
 var express = require('express');
 var compression = require('compression');
 var sqlite3 = require('sqlite3').verbose();
+const bodyParser = require('body-parser')
 
 
 var db = new sqlite3.Database(':memory:');
 
+
+// For now we have two hard-coded databases: "events" (to play with the actual SQL) and "posts" whichexemplifies the ejs / displaying side
+
+
+// In-memory SQL database
 db.serialize(function() {
-    db.run("CREATE TABLE events (info TEXT, eventdate DATE  CHECK (date(eventdate) IS NOT NULL))");
+    db.run("CREATE TABLE events (info TEXT NOT NULL, eventdate DATE  CHECK (date(eventdate) IS NOT NULL))");
 
     var stmt = db.prepare("INSERT INTO events (info, eventdate) VALUES (?, ?)");
     for (var i = 0; i < 5; i++) {
@@ -51,6 +57,9 @@ const posts = [
 // Create our Express application
 var app = express();
 
+// Body Parser for requests
+app.use(bodyParser.urlencoded({extended: true}))
+
 // Compression middleware
 app.use(compression());
 
@@ -65,7 +74,7 @@ var router = express.Router();
 router.get('/', function(req, res) {
   res.render('home', {posts: posts});
 });
-
+    
 app.get('/events', (req, res) => {
     db.all("SELECT rowid AS id, info, eventdate FROM events", function(err, rows) {
               //console.log(row.id + ": " + row.info); // if using db.each
@@ -73,6 +82,18 @@ app.get('/events', (req, res) => {
         res.send(rows)
 })
     });
+
+app.get('/new', (req, res) => {
+    res.render('newevent')
+//        db.run("INSERT INTO events (info, eventdate) VALUES (?, ?)",  Ipsum " + i, '2004-11-3'+i], function errorCatcher(err){ if (err) console.log('Error at insertion '+i+': '+err);});  // Problem: i is always 5 by the time the callback is called!
+    
+});
+
+app.post('/addevent', (req, res) => {
+ // console.log(req.body)  
+        db.run("INSERT INTO events (info, eventdate) VALUES (?, ?)",  [req.body.info, req.body.eventdate], function errorCatcher(err){ if (err) console.log('Error at insertion of event: '+err);});  // Problem: i is always 5 by the time the callback is called!
+    
+});
 
 // blog post
 app.get('/post/:id', (req, res) => {
@@ -88,6 +109,7 @@ app.get('/post/:id', (req, res) => {
                 body: post.body
               })
 })
+
 
 
 // Register all our routes
